@@ -1,0 +1,23 @@
+{
+    "name": "ddd-laravel/shared",
+    "type": "library",
+    "description": "Shared components for Laravel DDD implementation",
+    "keywords": ["laravel", "ddd", "domain-driven-design", "shared"],
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Modules\\Shared\\": ""
+        }
+    },
+    "require": {
+        "php": "^8.2",
+        "ramsey/uuid": "^4.7"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Modules\\Shared\\Infrastructure\\Providers\\SharedServiceProvider"
+            ]
+        }
+    }
+}

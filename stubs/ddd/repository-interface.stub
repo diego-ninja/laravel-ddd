@@ -1,0 +1,62 @@
+<?php
+
+namespace {{ namespace }}\Domain\Repositories;
+
+use {{ namespace }}\Domain\Entities\{{ name }};
+use {{ namespace }}\Domain\ValueObjects\{{ entityId }};
+
+interface {{ repositoryInterface }}
+{
+    /**
+     * Find {{ entityVariable }} by ID.
+     */
+    public function findById({{ entityId }} $id): ?{{ name }};
+
+    /**
+     * Get {{ entityVariable }} by ID or fail.
+     */
+    public function getById({{ entityId }} $id): {{ name }};
+
+    /**
+     * Save {{ entityVariable }}.
+     */
+    public function save({{ name }} ${{ entityVariable }}): void;
+
+    /**
+     * Delete {{ entityVariable }}.
+     */
+    public function delete({{ name }} ${{ entityVariable }}): void;
+
+    /**
+     * Generate next identity.
+     */
+    public function nextIdentity(): {{ entityId }};
+
+    /**
+     * Check if {{ entityVariable }} exists.
+     */
+    public function exists({{ entityId }} $id): bool;
+
+    /**
+     * Find all {{ entityVariable }}s.
+     */
+    public function findAll(): array;
+
+    /**
+     * Find {{ entityVariable }}s with pagination.
+     */
+    public function findPaginated(int $page = 1, int $perPage = 15): array;
+
+    /**
+     * Count total {{ entityVariable }}s.
+     */
+    public function count(): int;
+
+    /**
+     * Find {{ entityVariable }}s by criteria.
+     * 
+     * @param array $criteria
+     * @return {{ name }}[]
+     */
+    public function findByCriteria(array $criteria): array;
+}

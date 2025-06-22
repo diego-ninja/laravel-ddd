@@ -1,0 +1,90 @@
+<?php
+
+namespace {{ namespace }}\Domain\Entities;
+
+use Modules\Shared\Domain\Entities\AggregateRoot;
+use {{ namespace }}\Domain\ValueObjects\{{ entityId }};
+use {{ namespace }}\Domain\Exceptions\{{ context }}DomainException;
+
+class {{ name }} extends AggregateRoot
+{
+    private function __construct(
+        private readonly {{ entityId }} $id,
+        // Add other properties here
+    ) {
+    }
+
+    /**
+     * Create a new {{ name }}.
+     */
+    public static function create(
+        {{ entityId }} $id,
+        // Add other parameters here
+    ): self {
+        // Validate business rules here
+        
+        ${{ nameLower }} = new self(
+            $id,
+            // Pass other parameters here
+        );
+
+        // Record domain event
+        // ${{ nameLower }}->record(new {{ name }}WasCreated($id->value()));
+
+        return ${{ nameLower }};
+    }
+
+    /**
+     * Get the {{ nameLower }} ID.
+     */
+    public function id(): {{ entityId }}
+    {
+        return $this->id;
+    }
+
+    /**
+     * Update {{ nameLower }} information.
+     */
+    public function update(/* parameters */): void
+    {
+        // Validate business rules
+        
+        // Update properties
+        
+        // Record domain event if needed
+        // $this->record(new {{ name }}WasUpdated($this->id->value()));
+    }
+
+    /**
+     * Check if {{ nameLower }} can be deleted.
+     */
+    public function canBeDeleted(): bool
+    {
+        // Implement business rules for deletion
+        return true;
+    }
+
+    /**
+     * Delete the {{ nameLower }}.
+     */
+    public function delete(): void
+    {
+        if (!$this->canBeDeleted()) {
+            throw {{ context }}DomainException::businessRuleViolation('{{ name }} cannot be deleted');
+        }
+
+        // Record domain event
+        // $this->record(new {{ name }}WasDeleted($this->id->value()));
+    }
+
+    /**
+     * Convert to array for serialization.
+     */
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->id->value(),
+            // Add other properties here
+        ];
+    }
+}

@@ -1,0 +1,166 @@
+<?php
+
+namespace {{ namespace }}\Infrastructure\Persistence;
+
+use {{ namespace }}\Domain\Entities\{{ name }};
+use {{ namespace }}\Domain\Repositories\{{ repositoryInterface }};
+use {{ namespace }}\Domain\ValueObjects\{{ entityId }};
+use {{ namespace }}\Domain\Exceptions\{{ context }}DomainException;
+use {{ namespace }}\Infrastructure\Persistence\Eloquent\{{ eloquentModel }};
+
+class {{ eloquentRepository }} implements {{ repositoryInterface }}
+{
+    public function __construct(
+        private {{ eloquentModel }} $model
+    ) {
+    }
+
+    /**
+     * Find {{ entityVariable }} by ID.
+     */
+    public function findById({{ entityId }} $id): ?{{ name }}
+    {
+        ${{ modelVariable }} = $this->model->find($id->value());
+        
+        return ${{ modelVariable }} ? $this->toDomain(${{ modelVariable }}) : null;
+    }
+
+    /**
+     * Get {{ entityVariable }} by ID or fail.
+     */
+    public function getById({{ entityId }} $id): {{ name }}
+    {
+        ${{ entityVariable }} = $this->findById($id);
+        
+        if (!${{ entityVariable }}) {
+            throw {{ context }}DomainException::notFound('{{ name }}', $id->value());
+        }
+        
+        return ${{ entityVariable }};
+    }
+
+    /**
+     * Save {{ entityVariable }}.
+     */
+    public function save({{ name }} ${{ entityVariable }}): void
+    {
+        ${{ modelVariable }} = $this->model->find(${{ entityVariable }}->id()->value());
+        
+        if (${{ modelVariable }}) {
+            $this->updateModel(${{ modelVariable }}, ${{ entityVariable }});
+        } else {
+            $this->createModel(${{ entityVariable }});
+        }
+    }
+
+    /**
+     * Delete {{ entityVariable }}.
+     */
+    public function delete({{ name }} ${{ entityVariable }}): void
+    {
+        $this->model->where('id', ${{ entityVariable }}->id()->value())->delete();
+    }
+
+    /**
+     * Generate next identity.
+     */
+    public function nextIdentity(): {{ entityId }}
+    {
+        return {{ entityId }}::generate();
+    }
+
+    /**
+     * Check if {{ entityVariable }} exists.
+     */
+    public function exists({{ entityId }} $id): bool
+    {
+        return $this->model->where('id', $id->value())->exists();
+    }
+
+    /**
+     * Find all {{ entityVariable }}s.
+     */
+    public function findAll(): array
+    {
+        return $this->model->all()
+            ->map(fn(${{ modelVariable }}) => $this->toDomain(${{ modelVariable }}))
+            ->toArray();
+    }
+
+    /**
+     * Find {{ entityVariable }}s with pagination.
+     */
+    public function findPaginated(int $page = 1, int $perPage = 15): array
+    {
+        $offset = ($page - 1) * $perPage;
+        
+        $models = $this->model
+            ->offset($offset)
+            ->limit($perPage)
+            ->get();
+            
+        return [
+            'data' => $models->map(fn(${{ modelVariable }}) => $this->toDomain(${{ modelVariable }}))->toArray(),
+            'total' => $this->count(),
+            'page' => $page,
+            'perPage' => $perPage,
+            'hasMore' => $offset + $perPage < $this->count(),
+        ];
+    }
+
+    /**
+     * Count total {{ entityVariable }}s.
+     */
+    public function count(): int
+    {
+        return $this->model->count();
+    }
+
+    /**
+     * Find {{ entityVariable }}s by criteria.
+     */
+    public function findByCriteria(array $criteria): array
+    {
+        $query = $this->model->newQuery();
+        
+        foreach ($criteria as $field => $value) {
+            $query->where($field, $value);
+        }
+        
+        return $query->get()
+            ->map(fn(${{ modelVariable }}) => $this->toDomain(${{ modelVariable }}))
+            ->toArray();
+    }
+
+    /**
+     * Convert Eloquent model to domain entity.
+     */
+    private function toDomain({{ eloquentModel }} ${{ modelVariable }}): {{ name }}
+    {
+        return {{ name }}::create(
+            {{ entityId }}::fromString(${{ modelVariable }}->id),
+            // Map other attributes here
+        );
+    }
+
+    /**
+     * Create new Eloquent model from domain entity.
+     */
+    private function createModel({{ name }} ${{ entityVariable }}): void
+    {
+        $this->model->create([
+            'id' => ${{ entityVariable }}->id()->value(),
+            // Map other attributes here
+        ]);
+    }
+
+    /**
+     * Update existing Eloquent model from domain entity.
+     */
+    private function updateModel({{ eloquentModel }} ${{ modelVariable }}, {{ name }} ${{ entityVariable }}): void
+    {
+        ${{ modelVariable }}->update([
+            // Map attributes here
+        ]);
+    }
+}

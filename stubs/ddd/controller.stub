@@ -1,0 +1,76 @@
+<?php
+
+namespace Modules\{{ context }}\Infrastructure\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+
+/**
+ * {{ name }}Controller
+ * 
+ * Handles {{ nameLower }} related HTTP requests for {{ context }} bounded context.
+ */
+class {{ name }}Controller extends BaseController
+{
+    /**
+     * Display a listing of {{ namePlural }}.
+     */
+    public function index(Request $request): Response
+    {
+        // Example: return $this->executeQuery(new Get{{ name }}ListQuery());
+        return $this->success([]);
+    }
+
+    /**
+     * Show the form for creating a new {{ nameLower }}.
+     */
+    public function create(): Response
+    {
+        return $this->success();
+    }
+
+    /**
+     * Store a newly created {{ nameLower }} in storage.
+     */
+    public function store(Request $request): Response
+    {
+        // Example: return $this->executeCommand(new Create{{ name }}Command($request->validated()));
+        return $this->success();
+    }
+
+    /**
+     * Display the specified {{ nameLower }}.
+     */
+    public function show(string $id): Response
+    {
+        // Example: return $this->executeQuery(new Get{{ name }}ByIdQuery($id));
+        return $this->success();
+    }
+
+    /**
+     * Show the form for editing the specified {{ nameLower }}.
+     */
+    public function edit(string $id): Response
+    {
+        // Example: return $this->executeQuery(new Get{{ name }}ByIdQuery($id));
+        return $this->success();
+    }
+
+    /**
+     * Update the specified {{ nameLower }} in storage.
+     */
+    public function update(Request $request, string $id): Response
+    {
+        // Example: return $this->executeCommand(new Update{{ name }}Command($id, $request->validated()));
+        return $this->success();
+    }
+
+    /**
+     * Remove the specified {{ nameLower }} from storage.
+     */
+    public function destroy(string $id): Response
+    {
+        // Example: return $this->executeCommand(new Delete{{ name }}Command($id));
+        return $this->success();
+    }
+}

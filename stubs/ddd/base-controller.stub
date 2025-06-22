@@ -1,0 +1,71 @@
+<?php
+
+namespace Modules\{{ context }}\Infrastructure\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Routing\Controller;
+use Modules\Shared\Application\Contracts\CommandBusInterface;
+use Modules\Shared\Application\Contracts\QueryBusInterface;
+
+/**
+ * Base controller for {{ context }} bounded context.
+ * Provides common functionality for all controllers in this context.
+ */
+abstract class BaseController extends Controller
+{
+    public function __construct(
+        protected CommandBusInterface $commandBus,
+        protected QueryBusInterface $queryBus
+    ) {
+        // Add any common middleware or initialization here
+    }
+
+    /**
+     * Return a successful response.
+     */
+    protected function success(mixed $data = null, int $status = Response::HTTP_OK): Response
+    {
+        return response()->json([
+            'success' => true,
+            'data' => $data,
+        ], $status);
+    }
+
+    /**
+     * Return an error response.
+     */
+    protected function error(string $message, int $status = Response::HTTP_BAD_REQUEST): Response
+    {
+        return response()->json([
+            'success' => false,
+            'message' => $message,
+        ], $status);
+    }
+
+    /**
+     * Execute a command and return response.
+     */
+    protected function executeCommand(object $command): Response
+    {
+        try {
+            $result = $this->commandBus->dispatch($command);
+            return $this->success($result, Response::HTTP_CREATED);
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    /**
+     * Execute a query and return response.
+     */
+    protected function executeQuery(object $query): Response
+    {
+        try {
+            $result = $this->queryBus->ask($query);
+            return $this->success($result);
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        }
+    }
+}

@@ -1,0 +1,222 @@
+<?php
+
+namespace Modules\Sales\Application\Middleware\Queries;
+
+use Modules\Sales\Domain\Exceptions\SalesDomainException;
+use Closure;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
+
+class CachingMiddleware
+{
+    /**
+     * Handle query middleware.
+     */
+    public function handle(string $queryClass, array $criteria, Closure $next): mixed
+    {
+        // Pre-execution logic
+        $this->beforeExecution($queryClass, $criteria);
+
+        try {
+            // Execute the query handler
+            $result = $next($queryClass, $criteria);
+
+            // Post-execution logic
+            $this->afterExecution($queryClass, $criteria, $result);
+
+            return $result;
+        } catch (\Throwable $exception) {
+            // Handle errors
+            $this->onError($queryClass, $criteria, $exception);
+            
+            throw $exception;
+        }
+    }
+
+    /**
+     * Logic to execute before query handling.
+     */
+    private function beforeExecution(string $queryClass, array $criteria): void
+    {
+        // Examples of pre-execution logic:
+        
+        // 1. Logging
+        Log::debug('Executing query', [
+            'query_type' => $queryClass,
+            'criteria' => $criteria,
+        ]);
+
+        // 2. Authentication check (for sensitive queries)
+        // $this->ensureUserCanAccessQuery($queryClass, $criteria);
+
+        // 3. Input validation
+        // $this->validateCriteria($queryClass, $criteria);
+
+        // 4. Rate limiting (for expensive queries)
+        // $this->checkQueryRateLimit($queryClass, $criteria);
+
+        // 5. Query optimization hints
+        // $this->optimizeQuery($queryClass, $criteria);
+    }
+
+    /**
+     * Logic to execute after successful query handling.
+     */
+    private function afterExecution(string $queryClass, array $criteria, mixed $result): void
+    {
+        // Examples of post-execution logic:
+        
+        // 1. Result caching
+        $this->cacheResult($queryClass, $criteria, $result);
+
+        // 2. Performance logging
+        Log::debug('Query executed successfully', [
+            'query_type' => $queryClass,
+            'result_count' => is_array($result) ? count($result) : 1,
+        ]);
+
+        // 3. Metrics collection
+        // $this->recordQueryMetrics($queryClass, 'success', $result);
+
+        // 4. Result transformation
+        // $result = $this->transformResult($result);
+
+        // 5. Analytics tracking
+        // $this->trackQueryUsage($queryClass, $criteria);
+    }
+
+    /**
+     * Handle errors during query execution.
+     */
+    private function onError(string $queryClass, array $criteria, \Throwable $exception): void
+    {
+        // Examples of error handling:
+        
+        // 1. Error logging
+        Log::error('Query execution failed', [
+            'query_type' => $queryClass,
+            'criteria' => $criteria,
+            'error' => $exception->getMessage(),
+        ]);
+
+        // 2. Metrics collection
+        // $this->recordQueryMetrics($queryClass, 'error');
+
+        // 3. Fallback mechanisms
+        // $this->tryFallbackQuery($queryClass, $criteria);
+    }
+
+    /**
+     * Cache query results.
+     */
+    private function cacheResult(string $queryClass, array $criteria, mixed $result): void
+    {
+        // Generate cache key
+        $cacheKey = $this->generateCacheKey($queryClass, $criteria);
+        
+        // Determine cache TTL based on query type
+        $cacheTtl = $this->getCacheTtl($queryClass);
+        
+        // Cache the result
+        Cache::put($cacheKey, $result, $cacheTtl);
+    }
+
+    /**
+     * Generate cache key for query.
+     */
+    private function generateCacheKey(string $queryClass, array $criteria): string
+    {
+        $baseKey = 'query:' . class_basename($queryClass);
+        $criteriaHash = md5(serialize($criteria));
+        
+        return "{$baseKey}:{$criteriaHash}";
+    }
+
+    /**
+     * Get cache TTL based on query type.
+     */
+    private function getCacheTtl(string $queryClass): int
+    {
+        // Different TTL based on query type
+        $ttlMap = [
+            // Static data - cache longer
+            'GetProductCategories' => 3600, // 1 hour
+            'GetStaticContent' => 1800,     // 30 minutes
+            
+            // Dynamic data - cache shorter
+            'GetOrderHistory' => 300,       // 5 minutes
+            'GetUserDashboard' => 60,       // 1 minute
+            
+            // Real-time data - very short cache
+            'GetCurrentStock' => 30,        // 30 seconds
+        ];
+
+        return $ttlMap[class_basename($queryClass)] ?? 300; // Default 5 minutes
+    }
+
+    /**
+     * Ensure user can access the query.
+     */
+    private function ensureUserCanAccessQuery(string $queryClass, array $criteria): void
+    {
+        // Implement query-level authorization
+        // Example:
+        // if (!auth()->check()) {
+        //     throw SalesDomainException::businessRuleViolation('Authentication required');
+        // }
+        //
+        // if ($this->isRestrictedQuery($queryClass)) {
+        //     if (!auth()->user()->hasRole('admin')) {
+        //         throw SalesDomainException::businessRuleViolation('Insufficient permissions');
+        //     }
+        // }
+    }
+
+    /**
+     * Validate query criteria.
+     */
+    private function validateCriteria(string $queryClass, array $criteria): void
+    {
+        // Validate input criteria
+        // Example:
+        // if (isset($criteria['page']) && $criteria['page'] < 1) {
+        //     throw SalesDomainException::invalidData('Page must be greater than 0');
+        // }
+        //
+        // if (isset($criteria['per_page']) && $criteria['per_page'] > 100) {
+        //     throw SalesDomainException::invalidData('Per page limit exceeded');
+        // }
+    }
+
+    /**
+     * Check if query is restricted.
+     */
+    private function isRestrictedQuery(string $queryClass): bool
+    {
+        $restrictedQueries = [
+            'GetUserPersonalData',
+            'GetAdminReports',
+            'GetSystemMetrics',
+        ];
+
+        return in_array(class_basename($queryClass), $restrictedQueries);
+    }
+
+    /**
+     * Record query metrics.
+     */
+    private function recordQueryMetrics(string $queryClass, string $status, mixed $result = null): void
+    {
+        // Record query execution metrics
+        // Example:
+        // app('metrics')->increment('queries.executed', [
+        //     'query_type' => class_basename($queryClass),
+        //     'status' => $status,
+        //     'context' => 'sales',
+        // ]);
+        //
+        // if ($result && is_array($result)) {
+        //     app('metrics')->histogram('queries.result_size', count($result));
+        // }
+    }
+}

@@ -1,0 +1,167 @@
+<?php
+
+namespace Modules\Sales\Domain\ValueObjects;
+
+use Modules\Sales\Domain\Exceptions\SalesDomainException;
+
+readonly class Price
+{
+    private function __construct(
+        private int $amount,
+        private string $currency
+    ) {
+        $this->validate($amount, $currency);
+    }
+
+    /**
+     * Create from float amount and currency.
+     */
+    public static function fromFloat(float $amount, string $currency): self
+    {
+        return new self((int) round($amount * 100), $currency);
+    }
+
+    /**
+     * Create from int amount (in cents) and currency.
+     */
+    public static function fromInt(int $amount, string $currency): self
+    {
+        return new self($amount, $currency);
+    }
+
+    /**
+     * Get the amount in cents.
+     */
+    public function amount(): int
+    {
+        return $this->amount;
+    }
+
+    /**
+     * Get the amount as float.
+     */
+    public function amountAsFloat(): float
+    {
+        return $this->amount / 100;
+    }
+
+    /**
+     * Get the currency.
+     */
+    public function currency(): string
+    {
+        return $this->currency;
+    }
+
+    /**
+     * Check if equals to another Price.
+     */
+    public function equals(self $other): bool
+    {
+        return $this->amount === $other->amount && $this->currency === $other->currency;
+    }
+
+    /**
+     * Add another Price.
+     */
+    public function add(self $other): self
+    {
+        $this->ensureSameCurrency($other);
+        return new self($this->amount + $other->amount, $this->currency);
+    }
+
+    /**
+     * Subtract another Price.
+     */
+    public function subtract(self $other): self
+    {
+        $this->ensureSameCurrency($other);
+        return new self($this->amount - $other->amount, $this->currency);
+    }
+
+    /**
+     * Multiply by a factor.
+     */
+    public function multiply(float $factor): self
+    {
+        return new self((int) round($this->amount * $factor), $this->currency);
+    }
+
+    /**
+     * Check if greater than another Price.
+     */
+    public function isGreaterThan(self $other): bool
+    {
+        $this->ensureSameCurrency($other);
+        return $this->amount > $other->amount;
+    }
+
+    /**
+     * Check if less than another Price.
+     */
+    public function isLessThan(self $other): bool
+    {
+        $this->ensureSameCurrency($other);
+        return $this->amount < $other->amount;
+    }
+
+    /**
+     * Check if zero.
+     */
+    public function isZero(): bool
+    {
+        return $this->amount === 0;
+    }
+
+    /**
+     * Check if positive.
+     */
+    public function isPositive(): bool
+    {
+        return $this->amount > 0;
+    }
+
+    /**
+     * Check if negative.
+     */
+    public function isNegative(): bool
+    {
+        return $this->amount < 0;
+    }
+
+    /**
+     * Convert to string.
+     */
+    public function __toString(): string
+    {
+        return sprintf('%.2f %s', $this->amountAsFloat(), $this->currency);
+    }
+
+    /**
+     * Ensure same currency for operations.
+     */
+    private function ensureSameCurrency(self $other): void
+    {
+        if ($this->currency !== $other->currency) {
+            throw SalesDomainException::invalidData('Cannot operate on different currencies');
+        }
+    }
+
+    /**
+     * Validate the money value.
+     */
+    private function validate(int $amount, string $currency): void
+    {
+        if (empty($currency)) {
+            throw SalesDomainException::invalidData('Currency cannot be empty');
+        }
+
+        if (strlen($currency) !== 3) {
+            throw SalesDomainException::invalidData('Currency must be a 3-letter ISO code');
+        }
+
+        if (!ctype_upper($currency)) {
+            throw SalesDomainException::invalidData('Currency must be uppercase');
+        }
+    }
+}

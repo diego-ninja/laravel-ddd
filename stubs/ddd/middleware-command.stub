@@ -1,0 +1,170 @@
+<?php
+
+namespace {{ namespace }}\Application\Middleware\Commands;
+
+use {{ namespace }}\Domain\Exceptions\{{ context }}DomainException;
+use Closure;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+
+class {{ middlewareName }}
+{
+    /**
+     * Handle command middleware.
+     */
+    public function handle(object $command, Closure $next): mixed
+    {
+        // Pre-execution logic
+        $this->beforeExecution($command);
+
+        try {
+            // Execute the command handler
+            $result = $next($command);
+
+            // Post-execution logic
+            $this->afterExecution($command, $result);
+
+            return $result;
+        } catch (\Throwable $exception) {
+            // Handle errors
+            $this->onError($command, $exception);
+            
+            throw $exception;
+        }
+    }
+
+    /**
+     * Logic to execute before command handling.
+     */
+    private function beforeExecution(object $command): void
+    {
+        // Examples of pre-execution logic:
+        
+        // 1. Logging
+        Log::info('Executing command', [
+            'command_type' => get_class($command),
+            'command_data' => method_exists($command, 'toArray') ? $command->toArray() : [],
+        ]);
+
+        // 2. Authentication/Authorization
+        // $this->ensureUserIsAuthorized($command);
+
+        // 3. Validation
+        // $this->validateCommand($command);
+
+        // 4. Rate limiting
+        // $this->checkRateLimit($command);
+
+        // 5. Start database transaction
+        // DB::beginTransaction();
+    }
+
+    /**
+     * Logic to execute after successful command handling.
+     */
+    private function afterExecution(object $command, mixed $result): void
+    {
+        // Examples of post-execution logic:
+        
+        // 1. Success logging
+        Log::info('Command executed successfully', [
+            'command_type' => get_class($command),
+        ]);
+
+        // 2. Commit database transaction
+        // DB::commit();
+
+        // 3. Cache invalidation
+        // $this->invalidateCache($command);
+
+        // 4. Metrics collection
+        // $this->recordMetrics($command, 'success');
+
+        // 5. Notifications
+        // $this->sendNotifications($command, $result);
+    }
+
+    /**
+     * Handle errors during command execution.
+     */
+    private function onError(object $command, \Throwable $exception): void
+    {
+        // Examples of error handling:
+        
+        // 1. Error logging
+        Log::error('Command execution failed', [
+            'command_type' => get_class($command),
+            'error' => $exception->getMessage(),
+            'trace' => $exception->getTraceAsString(),
+        ]);
+
+        // 2. Rollback database transaction
+        // DB::rollBack();
+
+        // 3. Metrics collection
+        // $this->recordMetrics($command, 'error');
+
+        // 4. Alert notifications
+        // $this->sendErrorNotifications($command, $exception);
+    }
+
+    /**
+     * Ensure user is authorized to execute the command.
+     */
+    private function ensureUserIsAuthorized(object $command): void
+    {
+        // Implement authorization logic
+        // Example:
+        // if (!auth()->check()) {
+        //     throw {{ context }}DomainException::businessRuleViolation('User must be authenticated');
+        // }
+        //
+        // if (!auth()->user()->can('execute', $command)) {
+        //     throw {{ context }}DomainException::businessRuleViolation('User not authorized for this action');
+        // }
+    }
+
+    /**
+     * Validate command data.
+     */
+    private function validateCommand(object $command): void
+    {
+        // If command has a validator, use it
+        $validatorClass = get_class($command) . 'Validator';
+        
+        if (class_exists($validatorClass)) {
+            $validator = app($validatorClass);
+            $validator->validate($command);
+        }
+    }
+
+    /**
+     * Check rate limiting for the command.
+     */
+    private function checkRateLimit(object $command): void
+    {
+        // Implement rate limiting logic
+        // Example using Laravel's RateLimiter:
+        // $key = 'command:' . get_class($command) . ':' . auth()->id();
+        // 
+        // if (RateLimiter::tooManyAttempts($key, 10)) {
+        //     throw {{ context }}DomainException::businessRuleViolation('Too many attempts');
+        // }
+        // 
+        // RateLimiter::hit($key, 60); // 1 minute window
+    }
+
+    /**
+     * Record metrics for monitoring.
+     */
+    private function recordMetrics(object $command, string $status): void
+    {
+        // Record command execution metrics
+        // Example:
+        // app('metrics')->increment('commands.executed', [
+        //     'command_type' => class_basename($command),
+        //     'status' => $status,
+        //     'context' => '{{ contextLower }}',
+        // ]);
+    }
+}

@@ -1,0 +1,35 @@
+<?php
+
+namespace Modules\{{ context }}\Infrastructure\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+
+/**
+ * {{ name }}Endpoint
+ * 
+ * Single-action invokable controller for {{ nameLower }} operation in {{ context }} bounded context.
+ */
+class {{ name }}Endpoint extends BaseController
+{
+    /**
+     * Handle the {{ nameLower }} request.
+     */
+    public function __invoke(Request $request): Response
+    {
+        // TODO: Implement your business logic here
+        // 
+        // Examples:
+        // 
+        // For Command operations:
+        // return $this->executeCommand(new {{ name }}Command($request->validated()));
+        //
+        // For Query operations:
+        // return $this->executeQuery(new {{ name }}Query($request->validated()));
+        //
+        // For simple responses:
+        // return $this->success(['message' => '{{ name }} executed successfully']);
+
+        return $this->success(['message' => '{{ name }} endpoint called successfully']);
+    }
+}

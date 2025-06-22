@@ -1,0 +1,53 @@
+<?php
+
+namespace {{ namespace }}\Infrastructure\Providers;
+
+use Illuminate\Support\ServiceProvider;
+
+class {{ context }}ServiceProvider extends ServiceProvider
+{
+    /**
+     * Register services.
+     */
+    public function register(): void
+    {
+        $this->registerRepositories();
+        $this->registerServices();
+    }
+
+    /**
+     * Bootstrap services.
+     */
+    public function boot(): void
+    {
+        $this->registerEventListeners();
+    }
+
+    /**
+     * Register repositories.
+     */
+    private function registerRepositories(): void
+    {
+        // Example:
+        // $this->app->bind(
+        //     \{{ namespace }}\Domain\Repositories\ExampleRepositoryInterface::class,
+        //     \{{ namespace }}\Infrastructure\Persistence\EloquentExampleRepository::class
+        // );
+    }
+
+    /**
+     * Register domain services.
+     */
+    private function registerServices(): void
+    {
+        // Register domain services here
+    }
+
+    /**
+     * Register event listeners.
+     */
+    private function registerEventListeners(): void
+    {
+        // Register event listeners here
+    }
+}

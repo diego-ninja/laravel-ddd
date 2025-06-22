@@ -1,0 +1,57 @@
+<?php
+
+namespace {{ namespace }}\Application\Commands\{{ commandName }};
+
+use Illuminate\Validation\Validator;
+use Illuminate\Support\Facades\Validator as ValidatorFactory;
+use {{ namespace }}\Domain\Exceptions\{{ context }}DomainException;
+
+class {{ validatorName }}
+{
+    /**
+     * Validate the {{ commandName }} command.
+     */
+    public function validate({{ commandName }}Command $command): void
+    {
+        $validator = $this->createValidator($command);
+
+        if ($validator->fails()) {
+            throw {{ context }}DomainException::invalidData(
+                'Command validation failed: ' . implode(', ', $validator->errors()->all())
+            );
+        }
+
+        // Additional business validation
+        $this->validateBusinessLogic($command);
+    }
+
+    /**
+     * Create Laravel validator instance.
+     */
+    private function createValidator({{ commandName }}Command $command): Validator
+    {
+        return ValidatorFactory::make($command->toArray(), $this->rules());
+    }
+
+    /**
+     * Get validation rules.
+     */
+    private function rules(): array
+    {
+        return [
+            // Add validation rules here
+            // 'property' => 'required|string|max:255',
+            // 'email' => 'required|email',
+            // 'amount' => 'required|numeric|min:0',
+        ];
+    }
+
+    /**
+     * Validate business logic.
+     */
+    private function validateBusinessLogic({{ commandName }}Command $command): void
+    {
+        // Add complex business validation here
+        // Example: Check if user has permission, validate business constraints, etc.
+    }
+}

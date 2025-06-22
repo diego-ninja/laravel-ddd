@@ -1,0 +1,131 @@
+<?php
+
+namespace {{ namespace }}\Domain\ValueObjects;
+
+use {{ namespace }}\Domain\Exceptions\{{ context }}DomainException;
+use DateTimeImmutable;
+use DateTimeInterface;
+use Modules\Shared\Domain\ValueObjects\BaseValueObject;
+
+readonly class {{ name }} extends BaseValueObject
+{
+    private function __construct(
+        private DateTimeImmutable $value
+    ) {
+    }
+
+    /**
+     * Create from string value.
+     */
+    public static function fromString(string $value): self
+    {
+        try {
+            $date = new DateTimeImmutable($value);
+            return new self($date);
+        } catch (\Exception $e) {
+            throw {{ context }}DomainException::invalidData("Invalid date format: {$value}");
+        }
+    }
+
+    /**
+     * Create from DateTimeInterface.
+     */
+    public static function fromDateTime(DateTimeInterface $value): self
+    {
+        return new self(DateTimeImmutable::createFromInterface($value));
+    }
+
+    /**
+     * Create current date.
+     */
+    public static function now(): self
+    {
+        return new self(new DateTimeImmutable());
+    }
+
+    /**
+     * Create from format.
+     */
+    public static function fromFormat(string $format, string $value): self
+    {
+        $date = DateTimeImmutable::createFromFormat($format, $value);
+        
+        if ($date === false) {
+            throw {{ context }}DomainException::invalidData("Invalid date format: {$value}");
+        }
+        
+        return new self($date);
+    }
+
+    /**
+     * Get the date value.
+     */
+    public function value(): DateTimeImmutable
+    {
+        return $this->value;
+    }
+
+    /**
+     * Check if before another {{ name }}.
+     */
+    public function isBefore(self $other): bool
+    {
+        return $this->value < $other->value;
+    }
+
+    /**
+     * Check if after another {{ name }}.
+     */
+    public function isAfter(self $other): bool
+    {
+        return $this->value > $other->value;
+    }
+
+    /**
+     * Check if in the past.
+     */
+    public function isPast(): bool
+    {
+        return $this->value < new DateTimeImmutable();
+    }
+
+    /**
+     * Check if in the future.
+     */
+    public function isFuture(): bool
+    {
+        return $this->value > new DateTimeImmutable();
+    }
+
+    /**
+     * Add days.
+     */
+    public function addDays(int $days): self
+    {
+        return new self($this->value->modify("+{$days} days"));
+    }
+
+    /**
+     * Subtract days.
+     */
+    public function subtractDays(int $days): self
+    {
+        return new self($this->value->modify("-{$days} days"));
+    }
+
+    /**
+     * Format the date.
+     */
+    public function format(string $format): string
+    {
+        return $this->value->format($format);
+    }
+
+    /**
+     * Convert to string (ISO 8601 format).
+     */
+    public function __toString(): string
+    {
+        return $this->value->format('Y-m-d H:i:s');
+    }
+}

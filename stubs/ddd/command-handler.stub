@@ -1,0 +1,50 @@
+<?php
+
+namespace {{ namespace }}\Application\Commands\{{ commandName }};
+
+use Modules\Shared\Application\Contracts\CommandHandlerInterface;
+use {{ namespace }}\Domain\Exceptions\{{ context }}DomainException;
+// Add repository imports here
+// use {{ namespace }}\Domain\Repositories\ExampleRepositoryInterface;
+
+class {{ handlerName }} implements CommandHandlerInterface
+{
+    public function __construct(
+        // Inject dependencies here
+        // private ExampleRepositoryInterface $exampleRepository,
+    ) {
+    }
+
+    /**
+     * Handle the {{ commandName }} command.
+     */
+    public function handle({{ commandName }}Command $command): void
+    {
+        // Validate business rules
+        $this->validateBusinessRules($command);
+
+        // Create or retrieve domain entities
+        // $entity = $this->exampleRepository->findById($id);
+
+        // Execute domain logic
+        // $entity->performAction();
+
+        // Save changes
+        // $this->exampleRepository->save($entity);
+
+        // Dispatch domain events (handled automatically by AggregateRoot)
+        // Events are collected and dispatched after successful persistence
+    }
+
+    /**
+     * Validate business rules before execution.
+     */
+    private function validateBusinessRules({{ commandName }}Command $command): void
+    {
+        // Add business rule validations here
+        // Example:
+        // if ($condition) {
+        //     throw {{ context }}DomainException::businessRuleViolation('Rule description');
+        // }
+    }
+}
