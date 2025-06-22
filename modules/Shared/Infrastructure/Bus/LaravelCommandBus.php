@@ -6,14 +6,24 @@ use Illuminate\Bus\Dispatcher;
 use Modules\Shared\Application\Contracts\CommandBusInterface;
 use Modules\Shared\Application\Contracts\CommandInterface;
 
-class LaravelCommandBus implements CommandBusInterface
+final readonly class LaravelCommandBus implements CommandBusInterface
 {
     public function __construct(
-        private readonly Dispatcher $dispatcher
+        private Dispatcher $dispatcher
     ) {}
 
-    public function dispatch(CommandInterface $command): mixed
+    public function dispatch(CommandInterface $command): void
     {
-        return $this->dispatcher->dispatch($command);
+        $this->dispatcher->dispatch($command);
+    }
+
+    public function register(string $commandClass, string $handlerClass): void
+    {
+        // TODO: Implement register() method.
+    }
+
+    public function addMiddleware(string $middlewareClass): void
+    {
+        // TODO: Implement addMiddleware() method.
     }
 }

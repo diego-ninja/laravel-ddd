@@ -6,7 +6,7 @@ use Illuminate\Bus\Dispatcher;
 use Modules\Shared\Application\Contracts\QueryBusInterface;
 use Modules\Shared\Application\Contracts\QueryInterface;
 
-class LaravelQueryBus implements QueryBusInterface
+fianl readonly class LaravelQueryBus implements QueryBusInterface
 {
     public function __construct(
         private readonly Dispatcher $dispatcher
