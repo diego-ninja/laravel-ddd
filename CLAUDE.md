@@ -312,7 +312,7 @@ class Order extends AggregateRoot { }
 // Events extend Shared\DomainEvent  
 class OrderWasPlaced extends DomainEvent { }
 
-// Value Objects extend Shared\BaseValueObject
+// Value Objects extend Shared\AbstractValueObject
 class Price extends BaseValueObject { }
 
 // Handlers implement Shared interfaces

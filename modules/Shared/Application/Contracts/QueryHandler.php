@@ -2,7 +2,7 @@
 
 namespace Modules\Shared\Application\Contracts;
 
-interface QueryHandlerInterface
+interface QueryHandler
 {
     /**
      * Handle the query.

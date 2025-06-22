@@ -4,12 +4,12 @@ namespace Modules\Shared\Domain\Contracts;
 
 use DateTimeImmutable;
 
-interface DomainEventInterface
+interface DomainEvent extends \JsonSerializable
 {
     /**
      * Get the event name.
      */
-    public function eventName(): string;
+    public function name(): string;
 
     /**
      * Get the aggregate ID.

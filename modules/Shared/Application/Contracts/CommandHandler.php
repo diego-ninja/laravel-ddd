@@ -2,10 +2,10 @@
 
 namespace Modules\Shared\Application\Contracts;
 
-interface CommandHandlerInterface
+interface CommandHandler
 {
     /**
      * Handle the command.
      */
-    public function handle(CommandInterface $command): void;
+    public function handle(Command $command): void;
 }

@@ -2,7 +2,7 @@
 
 namespace Modules\Shared\Application\Contracts;
 
-interface CommandInterface
+interface Command
 {
     /**
      * Convert command to array for validation.

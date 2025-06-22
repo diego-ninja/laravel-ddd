@@ -3,16 +3,16 @@
 namespace Modules\Shared\Domain\Events;
 
 use DateTimeImmutable;
-use Modules\Shared\Domain\Contracts\DomainEventInterface;
+use Modules\Shared\Domain\Contracts\DomainEvent as DomainEventContract;
 use Ramsey\Uuid\Uuid;
 
-abstract class DomainEvent implements DomainEventInterface
+abstract readonly class DomainEvent implements DomainEventContract
 {
-    public readonly string $eventId;
-    public readonly DateTimeImmutable $occurredOn;
+    public string $eventId;
+    public DateTimeImmutable $occurredOn;
 
     public function __construct(
-        public readonly string $aggregateId
+        public string $aggregateId
     ) {
         $this->eventId = Uuid::uuid4()->toString();
         $this->occurredOn = new DateTimeImmutable();

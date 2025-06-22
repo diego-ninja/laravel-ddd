@@ -10,8 +10,10 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "dshafik/bag": "^2.5",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
+        "nesbot/carbon": "^3.10",
         "ramsey/uuid": "^4.7"
     },
     "require-dev": {

@@ -66,11 +66,11 @@ class MakeRepositoryCommand extends BaseDDDCommand
         $this->line('Files created:');
         $this->line("📁 modules/{$contextName}/Domain/Repositories/{$entityName}RepositoryInterface.php");
         $this->line("📁 modules/{$contextName}/Infrastructure/Persistence/Eloquent{$entityName}Repository.php");
-        
+
         if ($createModel) {
             $this->line("📁 modules/{$contextName}/Infrastructure/Persistence/Eloquent/{$entityName}Model.php");
         }
-        
+
         $this->line("📁 modules/{$contextName}/Infrastructure/Providers/{$contextName}ServiceProvider.php (updated)");
         $this->line('');
         $this->line('Usage example:');
@@ -183,14 +183,14 @@ class MakeRepositoryCommand extends BaseDDDCommand
     private function updateServiceProvider(string $contextName, string $entityName): void
     {
         $serviceProviderPath = $this->getContextPath($contextName) . "/Infrastructure/Providers/{$contextName}ServiceProvider.php";
-        
+
         if (!$this->files->exists($serviceProviderPath)) {
             $this->warn("Service Provider not found. Skipping binding registration.");
             return;
         }
 
         $content = $this->files->get($serviceProviderPath);
-        
+
         // Check if binding already exists
         $bindingCheck = "{$entityName}RepositoryInterface::class";
         if (str_contains($content, $bindingCheck)) {
@@ -200,12 +200,12 @@ class MakeRepositoryCommand extends BaseDDDCommand
         // Find the registerRepositories method and add the binding
         $interfaceClass = "\\{$this->getNamespace($contextName)}\\Domain\\Repositories\\{$entityName}RepositoryInterface::class";
         $implementationClass = "\\{$this->getNamespace($contextName)}\\Infrastructure\\Persistence\\Eloquent{$entityName}Repository::class";
-        
+
         $newBinding = "        \$this->app->bind(\n            {$interfaceClass},\n            {$implementationClass}\n        );";
 
         // Replace the comment in registerRepositories method
         $pattern = '/(\s+\/\/ Example:.*?\n\s+\/\/.*?\n\s+\/\/.*?\n\s+\/\/.*?\n\s+\/\/ \);)/s';
-        
+
         if (preg_match($pattern, $content)) {
             $content = preg_replace($pattern, $newBinding . "\n\n$1", $content);
         } else {

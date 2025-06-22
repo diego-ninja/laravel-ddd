@@ -2,11 +2,12 @@
 
 namespace Modules\Shared\Infrastructure\Support;
 
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Facades\File;
 use ReflectionClass;
 use ReflectionException;
-use Modules\Shared\Application\Contracts\CommandHandlerInterface;
-use Modules\Shared\Application\Contracts\QueryHandlerInterface;
+use Modules\Shared\Application\Contracts\CommandHandler;
+use Modules\Shared\Application\Contracts\QueryHandler;
 
 class HandlerDiscovery
 {
@@ -24,7 +25,7 @@ class HandlerDiscovery
                 continue;
             }
 
-            $handlers = array_merge($handlers, self::findHandlersInPath($commandPath, CommandHandlerInterface::class));
+            $handlers = array_merge($handlers, self::findHandlersInPath($commandPath, CommandHandler::class));
         }
 
         return $handlers;
@@ -44,7 +45,7 @@ class HandlerDiscovery
                 continue;
             }
 
-            $handlers = array_merge($handlers, self::findHandlersInPath($queryPath, QueryHandlerInterface::class));
+            $handlers = array_merge($handlers, self::findHandlersInPath($queryPath, QueryHandler::class));
         }
 
         return $handlers;
@@ -100,11 +101,12 @@ class HandlerDiscovery
 
     /**
      * Extract class name from file path.
+     * @throws FileNotFoundException
      */
     private static function getClassNameFromFile(string $filePath): ?string
     {
         $content = File::get($filePath);
-        
+
         // Extract namespace
         if (preg_match('/namespace\s+([^;]+);/', $content, $namespaceMatches)) {
             $namespace = trim($namespaceMatches[1]);

@@ -2,7 +2,10 @@
 
 namespace Modules\Shared\Domain\ValueObjects;
 
-abstract class BaseValueObject
+use Bag\Bag;
+use Stringable;
+
+abstract readonly class AbstractValueObject extends Bag implements Stringable
 {
     /**
      * Check if equals to another value object.
@@ -20,13 +23,5 @@ abstract class BaseValueObject
     public function toArray(): array
     {
         return get_object_vars($this);
-    }
-
-    /**
-     * Convert to JSON.
-     */
-    public function toJson(): string
-    {
-        return json_encode($this->toArray());
     }
 }
