@@ -7,15 +7,16 @@ use InvalidArgumentException;
 use Modules\Shared\Application\Contracts\CommandBus as CommandBusContract;
 use Modules\Shared\Application\Contracts\CommandHandler;
 use Modules\Shared\Application\Contracts\Command;
+use Modules\Shared\Application\DTOs\AbstractDTO;
 
 final class CommandBus extends AbstractBus implements CommandBusContract
 {
     /**
      * @throws BindingResolutionException
      */
-    public function dispatch(Command $command): void
+    public function dispatch(Command $command): ?AbstractDTO
     {
-        $this->executeWithMiddleware(
+        return $this->executeWithMiddleware(
             $command,
             function (Command $command) {
                 $handler = $this->resolveHandler($command);
@@ -26,7 +27,7 @@ final class CommandBus extends AbstractBus implements CommandBusContract
                     );
                 }
 
-                $handler->handle($command);
+                return $handler->handle($command);
             }
         );
     }}

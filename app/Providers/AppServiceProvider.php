@@ -11,6 +11,10 @@ use App\Console\Commands\DDD\MakeEventCommand;
 use App\Console\Commands\DDD\MakeCommandCommand;
 use App\Console\Commands\DDD\MakeQueryCommand;
 use App\Console\Commands\DDD\MakeMiddlewareCommand;
+use Modules\Shared\Infrastructure\Providers\SharedServiceProvider;
+use Dedoc\Scramble\Scramble;
+use Dedoc\Scramble\Support\Generator\OpenApi;
+use Dedoc\Scramble\Support\Generator\SecurityScheme;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -39,6 +43,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Register Shared module provider
-        $this->app->register(\Modules\Shared\Infrastructure\Providers\SharedServiceProvider::class);
+        $this->app->register(SharedServiceProvider::class);
     }
 }

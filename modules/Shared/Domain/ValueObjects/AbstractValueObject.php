@@ -3,25 +3,28 @@
 namespace Modules\Shared\Domain\ValueObjects;
 
 use Bag\Bag;
+use Modules\Shared\Domain\Contracts\ValueObject;
 use Stringable;
 
-abstract readonly class AbstractValueObject extends Bag implements Stringable
+abstract readonly class AbstractValueObject implements ValueObject
 {
+    public function __construct(protected mixed $value)
+    {
+        $this->validate($value);
+    }
+
     /**
      * Check if equals to another value object.
      */
-    abstract public function equals(self $other): bool;
-
-    /**
-     * Convert to string representation.
-     */
-    abstract public function __toString(): string;
-
-    /**
-     * Convert to array (useful for serialization).
-     */
-    public function toArray(): array
+    public function equals(ValueObject $other): bool
     {
-        return get_object_vars($this);
+        return $other instanceof self && $this->value === $other->value;
     }
+
+    /**
+     * Validate value.
+     *
+     * @throws \InvalidArgumentException
+     */
+    abstract public function validate(): void;
 }

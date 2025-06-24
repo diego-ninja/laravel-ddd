@@ -3,19 +3,27 @@
 namespace Modules\Shared\Domain\Events;
 
 use DateTimeImmutable;
+use Illuminate\Foundation\Events\Dispatchable;
 use Modules\Shared\Domain\Contracts\DomainEvent as DomainEventContract;
 use Ramsey\Uuid\Uuid;
 
 abstract readonly class DomainEvent implements DomainEventContract
 {
-    public string $eventId;
-    public DateTimeImmutable $occurredOn;
+    use Dispatchable;
+
+    public readonly string $eventId;
+    public readonly DateTimeImmutable $occurredOn;
 
     public function __construct(
-        public string $aggregateId
+        public readonly string $aggregateId
     ) {
         $this->eventId = Uuid::uuid4()->toString();
         $this->occurredOn = new DateTimeImmutable();
+    }
+
+    public function name(): string
+    {
+        return static::class;
     }
 
     /**
@@ -43,25 +51,23 @@ abstract readonly class DomainEvent implements DomainEventContract
     }
 
     /**
-     * Get the event name (must be implemented by concrete events).
-     */
-    abstract public function eventName(): string;
-
-    /**
      * Get event data for serialization.
      */
-    public function toPrimitives(): array
+    public function array(): array
     {
         return [
             'eventId' => $this->eventId,
             'aggregateId' => $this->aggregateId,
             'occurredOn' => $this->occurredOn->format('Y-m-d H:i:s'),
-            'eventName' => $this->eventName(),
+            'eventName' => $this->name(),
         ];
     }
 
     /**
-     * Create event from primitive data (must be implemented by concrete events).
+     * JsonSerializable implementation.
      */
-    abstract public static function fromPrimitives(array $data): self;
+    public function jsonSerialize(): array
+    {
+        return $this->array();
+    }
 }

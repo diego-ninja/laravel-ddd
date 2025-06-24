@@ -2,11 +2,11 @@
 
 namespace Modules\Shared\Infrastructure\UnitOfWork;
 
-use Modules\Shared\Application\Contracts\EventBus;
 use Modules\Shared\Application\Contracts\UnitOfWork as UnitOfWorkContract;
 use Modules\Shared\Domain\Contracts\DomainEvent;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Database\Connection;
+use Illuminate\Contracts\Events\Dispatcher as EventDispatcher;
 final class UnitOfWork implements UnitOfWorkContract
 {
     /**
@@ -19,7 +19,7 @@ final class UnitOfWork implements UnitOfWorkContract
 
     public function __construct(
         private readonly DatabaseManager $database,
-        private readonly EventBus $eventBus
+        private readonly EventDispatcher $eventDispatcher
     ) {}
 
     /**
@@ -82,7 +82,7 @@ final class UnitOfWork implements UnitOfWorkContract
     {
         if (!$this->isActive) {
             // If no active UoW, dispatch immediately
-            $this->eventBus->publish($event);
+            $this->eventDispatcher->dispatch($event);
             return;
         }
 
@@ -105,13 +105,13 @@ final class UnitOfWork implements UnitOfWorkContract
     }
 
     /**
-     * Dispatch all collected events through the event bus.
+     * Dispatch all collected events through Laravel's native event system.
      */
     private function dispatchCollectedEvents(): void
     {
         foreach ($this->collectedEvents as $event) {
             try {
-                $this->eventBus->publish($event);
+                $this->eventDispatcher->dispatch($event);
             } catch (\Throwable $exception) {
                 // Log the error but don't stop other events
                 logger()->error('Failed to dispatch domain event after commit', [

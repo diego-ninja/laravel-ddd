@@ -14,7 +14,10 @@
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
         "nesbot/carbon": "^3.10",
-        "ramsey/uuid": "^4.7"
+        "nyholm/psr7": "^1.8",
+        "ramsey/uuid": "^4.7",
+        "tymon/jwt-auth": "^2.2",
+        "wikimedia/composer-merge-plugin": "^2.1"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -32,7 +35,10 @@
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/",
             "Modules\\": "modules/"
-        }
+        },
+        "files": [
+            "helpers.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
@@ -67,6 +73,17 @@
     "extra": {
         "laravel": {
             "dont-discover": []
+        },
+        "merge-plugin": {
+            "include": [
+                "modules/*/composer.json"
+            ],
+            "recurse": false,
+            "replace": false,
+            "merge-dev": true,
+            "merge-extra": true,
+            "merge-extra-deep": true,
+            "merge-scripts": false
         }
     },
     "config": {
@@ -75,7 +92,8 @@
         "sort-packages": true,
         "allow-plugins": {
             "pestphp/pest-plugin": true,
-            "php-http/discovery": true
+            "php-http/discovery": true,
+            "wikimedia/composer-merge-plugin": true
         }
     },
     "minimum-stability": "stable",

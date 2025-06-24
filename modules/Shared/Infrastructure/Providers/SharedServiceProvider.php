@@ -6,21 +6,17 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Support\ServiceProvider;
 use Modules\Shared\Application\Contracts\CommandBus as CommandBusContract;
 use Modules\Shared\Application\Contracts\QueryBus as QueryBusContract;
-use Modules\Shared\Application\Contracts\EventBus as EventBusContract;
 use Modules\Shared\Application\Contracts\UnitOfWork as UnitOfWorkContract;
 use Modules\Shared\Application\Middleware\Command\AuditMiddleware;
 use Modules\Shared\Application\Middleware\Command\LoggingMiddleware as CommandLoggingMiddleware;
 use Modules\Shared\Application\Middleware\Command\UnitOfWorkMiddleware;
 use Modules\Shared\Application\Middleware\Command\ValidationMiddleware;
-use Modules\Shared\Application\Middleware\Event\AsyncEventMiddleware;
-use Modules\Shared\Application\Middleware\Event\EventStoreMiddleware;
-use Modules\Shared\Application\Middleware\Event\LoggingMiddleware as EventLoggingMiddleware;
 use Modules\Shared\Application\Middleware\Query\CachingMiddleware;
 use Modules\Shared\Application\Middleware\Query\LoggingMiddleware as QueryLoggingMiddleware;
 use Modules\Shared\Application\Middleware\Query\PerformanceMiddleware;
 use Modules\Shared\Infrastructure\Bus\CommandBus;
-use Modules\Shared\Infrastructure\Bus\EventBus;
 use Modules\Shared\Infrastructure\Bus\QueryBus;
+use Modules\Shared\Infrastructure\Listeners\EventStoreListener;
 use Modules\Shared\Infrastructure\Support\HandlerDiscovery;
 use Modules\Shared\Infrastructure\UnitOfWork\UnitOfWork;
 use Ramsey\Uuid\UuidFactory;
@@ -48,9 +44,9 @@ class SharedServiceProvider extends ServiceProvider
         $this->loadMigrations();
         $this->registerHandlers();
 
-        $this->configureEventBus();
         $this->configureQueryBus();
         $this->configureCommandBus();
+        $this->registerEventListeners();
     }
 
     private function registerUnitOfWork(): void
@@ -73,10 +69,6 @@ class SharedServiceProvider extends ServiceProvider
             return new QueryBus($app);
         });
 
-        // Event Bus
-        $this->app->singleton(EventBusContract::class, function ($app) {
-            return new EventBus($app);
-        });
     }
 
     private function registerMiddlewares(): void
@@ -90,9 +82,6 @@ class SharedServiceProvider extends ServiceProvider
         $this->app->singleton(QueryLoggingMiddleware::class);
         $this->app->singleton(PerformanceMiddleware::class);
 
-        $this->app->singleton(EventLoggingMiddleware::class);
-        $this->app->singleton(EventStoreMiddleware::class);
-        $this->app->singleton(AsyncEventMiddleware::class);
     }
 
     /**
@@ -115,23 +104,23 @@ class SharedServiceProvider extends ServiceProvider
     }
 
     /**
-     * Publish migrations.
+     * Publish Migrations.
      */
     private function publishMigrations(): void
     {
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__ . '/../../Database/Migrations' => database_path('migrations'),
-            ], 'ddd-migrations');
+                __DIR__ . '/../../Database/Migrations' => database_path('Migrations'),
+            ], 'ddd-Migrations');
         }
     }
 
     /**
-     * Load migrations.
+     * Load Migrations.
      */
     private function loadMigrations(): void
     {
-        $this->loadMigrationsFrom(__DIR__ . '/../../Database/Migrations');
+        $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
     }
 
     /**
@@ -150,6 +139,50 @@ class SharedServiceProvider extends ServiceProvider
         foreach ($queryHandlers as $handler) {
             $this->app->bind($handler, $handler);
         }
+
+        // Register command handlers with command bus
+        $commandBus = $this->app->make(CommandBusContract::class);
+        foreach ($commandHandlers as $handlerClass) {
+            $commandClass = $this->getCommandClassFromHandler($handlerClass);
+            if ($commandClass) {
+                $commandBus->register($commandClass, $handlerClass);
+            }
+        }
+
+        // Register query handlers with query bus
+        $queryBus = $this->app->make(QueryBusContract::class);
+        foreach ($queryHandlers as $handlerClass) {
+            $queryClass = $this->getQueryClassFromHandler($handlerClass);
+            if ($queryClass) {
+                $queryBus->register($queryClass, $handlerClass);
+            }
+        }
+    }
+
+    private function getCommandClassFromHandler(string $handlerClass): ?string
+    {
+        // Extract command class from handler class name
+        // e.g., CreateUserCommandHandler -> CreateUserCommand
+        if (str_ends_with($handlerClass, 'Handler')) {
+            $commandClass = str_replace('Handler', '', $handlerClass);
+            if (class_exists($commandClass)) {
+                return $commandClass;
+            }
+        }
+        return null;
+    }
+
+    private function getQueryClassFromHandler(string $handlerClass): ?string
+    {
+        // Extract query class from handler class name
+        // e.g., GetUsersQueryHandler -> GetUsersQuery
+        if (str_ends_with($handlerClass, 'Handler')) {
+            $queryClass = str_replace('Handler', '', $handlerClass);
+            if (class_exists($queryClass)) {
+                return $queryClass;
+            }
+        }
+        return null;
     }
 
     /**
@@ -179,14 +212,20 @@ class SharedServiceProvider extends ServiceProvider
     }
 
     /**
-     * @throws BindingResolutionException
+     * Register event listeners for Laravel's native event system.
      */
-    private function configureEventBus(): void
+    private function registerEventListeners(): void
     {
-        $eventBus = $this->app->make(EventBusContract::class);
-        $eventBus->addMiddleware(EventLoggingMiddleware::class);
-        $eventBus->addMiddleware(EventStoreMiddleware::class);
-        $eventBus->addMiddleware(AsyncEventMiddleware::class);
+        $this->app->singleton(EventStoreListener::class);
+
+        // Register the EventStoreListener as a wildcard listener but only for domain events
+        $this->app['events']->listen('*', function($eventName, $data) {
+            $event = $data[0] ?? null;
+            if ($event instanceof \Modules\Shared\Domain\Contracts\DomainEvent) {
+                $listener = $this->app->make(EventStoreListener::class);
+                $listener->handle($event);
+            }
+        });
     }
 
     /**
@@ -197,7 +236,6 @@ class SharedServiceProvider extends ServiceProvider
         return [
             CommandBusContract::class,
             QueryBusContract::class,
-            EventBusContract::class,
             'ddd.uuid.generator',
             'ddd.event.store',
         ];

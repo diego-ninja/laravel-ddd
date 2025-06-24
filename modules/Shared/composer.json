@@ -1,22 +1,23 @@
 {
-    "name": "ddd-laravel/shared",
-    "type": "library",
-    "description": "Shared components for Laravel DDD implementation",
-    "keywords": ["laravel", "ddd", "domain-driven-design", "shared"],
-    "license": "MIT",
-    "autoload": {
+    "autoload-dev": {
         "psr-4": {
-            "Modules\\Shared\\": ""
+            "Modules\\Shared\\Infrastructure\\Database\\Factories\\": "Infrastructure/Database/Factories/",
+            "Modules\\Shared\\Infrastructure\\Database\\Seeders\\": "Infrastructure/Database/Seeders/"
         }
-    },
-    "require": {
-        "php": "^8.2",
-        "ramsey/uuid": "^4.7"
     },
     "extra": {
         "laravel": {
             "providers": [
                 "Modules\\Shared\\Infrastructure\\Providers\\SharedServiceProvider"
+            ],
+            "migrations": [
+                "Infrastructure/Database/Migrations"
+            ],
+            "seeders": [
+                "Infrastructure/Database/Seeders"
+            ],
+            "factories": [
+                "Infrastructure/Database/Factories"
             ]
         }
     }

@@ -1,0 +1,24 @@
+{
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Users\\Infrastructure\\Database\\Factories\\": "Infrastructure/Database/Factories/",
+            "Modules\\Users\\Infrastructure\\Database\\Seeders\\": "Infrastructure/Database/Seeders/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Modules\\Users\\Infrastructure\\Providers\\UsersServiceProvider"
+            ],
+            "migrations": [
+                "Infrastructure/Database/Migrations"
+            ],
+            "seeders": [
+                "Infrastructure/Database/Seeders"
+            ],
+            "factories": [
+                "Infrastructure/Database/Factories"
+            ]
+        }
+    }
+}

@@ -7,5 +7,5 @@ interface QueryHandler
     /**
      * Handle the query.
      */
-    public function handle(array $criteria = []): mixed;
+    public function handle(Query $query): mixed;
 }

@@ -9,7 +9,7 @@ interface DomainEvent extends \JsonSerializable
     /**
      * Get the event name.
      */
-    public function name(): string;
+    public function eventName(): string;
 
     /**
      * Get the aggregate ID.
@@ -29,10 +29,5 @@ interface DomainEvent extends \JsonSerializable
     /**
      * Get event data for serialization.
      */
-    public function toPrimitives(): array;
-
-    /**
-     * Create event from primitive data.
-     */
-    public static function fromPrimitives(array $data): self;
+    public function array(): array;
 }

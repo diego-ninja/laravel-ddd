@@ -7,13 +7,14 @@ use InvalidArgumentException;
 use Modules\Shared\Application\Contracts\QueryHandler;
 use Modules\Shared\Application\Contracts\Query;
 use Modules\Shared\Application\Contracts\QueryBus as QueryBusContract;
+use Modules\Shared\Application\DTOs\AbstractDTO;
 
 final class QueryBus extends AbstractBus implements QueryBusContract
 {
     /**
      * @throws BindingResolutionException
      */
-    public function ask(Query $query): mixed
+    public function ask(Query $query): ?AbstractDTO
     {
         return $this->executeWithMiddleware(
             $query,
@@ -29,16 +30,5 @@ final class QueryBus extends AbstractBus implements QueryBusContract
                 return $handler->handle($query);
             }
         );
-    }
-
-    public function handle(string $queryHandlerClass, array $criteria = []): mixed
-    {
-        // Legacy method - create a generic query and dispatch
-        $query = new class($criteria) implements Query {
-            public function __construct(public readonly array $criteria) {}
-        };
-
-        $this->register($query::class, $queryHandlerClass);
-        return $this->ask($query);
     }
 }

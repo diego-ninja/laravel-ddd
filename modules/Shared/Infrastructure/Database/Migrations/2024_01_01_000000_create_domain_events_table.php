@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Run the Migrations.
      */
     public function up(): void
     {
@@ -23,7 +23,7 @@ return new class extends Migration
             $table->text('error_message')->nullable();
             $table->integer('version')->default(1);
             $table->timestamps();
-            
+
             // Indexes for performance
             $table->index(['aggregate_id', 'occurred_on']);
             $table->index(['event_type', 'status']);
@@ -33,7 +33,7 @@ return new class extends Migration
     }
 
     /**
-     * Reverse the migrations.
+     * Reverse the Migrations.
      */
     public function down(): void
     {
